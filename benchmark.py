@@ -64,5 +64,21 @@ if __name__ == "__main__":
     p.add_argument("--openai_api_key", default=None)
     p.add_argument("--openai_model", default=None)
     args = p.parse_args()
-    run(tasks_path=args.tasks, model_name=args.model,
-        openai_api_key=args.openai_api_key, openai_model=args.openai_model)
+    out = run(
+    tasks_path=args.tasks,
+    model_name=args.model,
+    openai_api_key=args.openai_api_key,
+    openai_model=args.openai_model
+)
+
+# Pretty RCS score summary
+scores = [item.get("rcs") for item in out.get("results", []) if "rcs" in item]
+if scores:
+    avg = sum(scores) / len(scores)
+    print("\n==============================")
+    print(f" Model: {args.openai_model or args.model}")
+    print(f" RCS Score: {avg:.3f}")
+    print("==============================\n")
+else:
+    print("No RCS scores found in results.")
+
