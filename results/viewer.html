@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Rose Coherence Viewer</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 880px; margin: 32px auto; padding: 0 12px; }
+  h1 { font-size: 22px; margin-bottom: 8px; }
+  .note{color:#555;margin:8px 0 16px}
+  pre { background:#0b0b0b;color:#c6f6c6;padding:12px;border-radius:8px;overflow:auto }
+  canvas{margin-top:24px}
+  label{font-weight:600}
+</style>
+</head>
+<body>
+  <h1>🌹 Rose Coherence Benchmark — Viewer</h1>
+  <div class="note">Load any <code>results/*.json</code> file to see per-task RCS and the average.</div>
+
+  <label>Select results JSON: </label>
+  <input type="file" id="fileInput" accept=".json">
+
+  <div id="summary"></div>
+  <canvas id="chart" width="860" height="320"></canvas>
+  <div id="raw"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  const fileInput = document.getElementById('fileInput');
+  const summary = document.getElementById('summary');
+  const raw = document.getElementById('raw');
+  let chart;
+
+  fileInput.addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    const r = new FileReader();
+    r.onload = (ev) => {
+      const data = JSON.parse(ev.target.result);
+      render(data);
+    };
+    r.readAsText(f);
+  });
+
+  function render(data){
+    const results = data.results || [];
+    const scores = results.map(r => r.rcs ?? 0);
+    const avg = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
+
+    summary.innerHTML = `
+      <p><strong>Model:</strong> ${data.model || data.model_name || 'n/a'}</p>
+      <p><strong>Average RCS:</strong> ${avg.toFixed(3)}</p>
+      <p><strong>Items:</strong> ${results.length}</p>
+    `;
+
+    const labels = results.map(r => r.task_id || r.intent || 'task');
+    const ctx = document.getElementById('chart').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label: 'RCS', data: scores }]
+      },
+      options: { scales: { y: { min: 0, max: 1 } } }
+    });
+
+    raw.innerHTML = `<pre>${escapeHTML(JSON.stringify(data, null, 2))}</pre>`;
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+  </script>
+</body>
+</html>
