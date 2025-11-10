@@ -1,3 +1,13 @@
+## Results (live)
+
+- Latest run: **echo adapter**  
+- **Average RCS:** `0.7728`  
+- JSON: [`rcs_echo_20251109-230939.json`](results/rcs_echo_20251109-230939.json)
+
+
+
+
+> RCS ranges 0.00–1.00 (higher = more coherent). Echo is a loopback sanity check; model runs (gpt-4o-mini, etc.) will be added as quota is enabled.
 # Rose Coherence Benchmark (RCS)
 
 **Scale:** 0.00 → 1.00 (higher is more coherent)  
